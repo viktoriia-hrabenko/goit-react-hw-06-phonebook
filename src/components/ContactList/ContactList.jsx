@@ -1,32 +1,36 @@
-// import PropTypes from 'prop-types';
-// import css from './ContactList.module.css'
+import { useSelector, useDispatch } from 'react-redux';
+import { remove } from '../../redux/slice';
+import ContactItem from './ContactItem/ContactItem';
+import Notification from 'components/Notification/Notification';
+import Button from 'components/Button/Button';
+import { StyledList } from './ContactList.styled';
 
-// export const ContactList = ({ contacts, deleteContact }) => {
-//         return (
-//             <ul>
-//                 {contacts.map(({ id, name, number }) => {
-//                     return (
-//                         <li key={id}>
-//                             <p>
-//                                 {name}: {number}
-//                             </p>
-//                             <button className={css.listDeleteButton} type="button" onClick={() => deleteContact(id)}>
-//                                 Delete
-//                             </button>
-//                         </li>
-//                     );
-//                 })}
-//             </ul>
-//         )
-// }
+const ContactList = () => {
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
-// ContactList.propTypes = {
-//   contacts: PropTypes.arrayOf(
-//     PropTypes.shape({
-//       name: PropTypes.string,
-//       number: PropTypes.string,
-//       id: PropTypes.string,
-//     })
-//     ),
-//     deleteContact: PropTypes.func.isRequired,
-// };
+  const filteredContacts = () =>
+    contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+
+  const contactsList = filter ? filteredContacts() : contacts;
+
+  return contactsList.length ? (
+    <StyledList>
+      {contactsList.map(({ id, name, number }) => (
+        <li className="listItem" key={id}>
+          <ContactItem name={name} number={number} />
+          <Button title="Delete" onClick={() => dispatch(remove(id))} />
+        </li>
+      ))}
+    </StyledList>
+  ) : (
+    <Notification
+      text={filter ? 'Could not find this name' : 'Contact list is empty'}
+    />
+  );
+};
+
+export default ContactList;
